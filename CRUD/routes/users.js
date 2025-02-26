@@ -4,7 +4,7 @@ import express from "express"
 // implementation of modularization Concept
 const router = express.Router();
 
-// Mock database
+// Mock database - used for demonstration/testing purposes
 const users = [
     {
       first_name: 'John',
