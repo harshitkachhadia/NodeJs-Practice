@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
+
+// Route handlers for different operations
 app.get('/add', (req, res) => {
   const { a, b } = req.query;
   const sum = parseInt(a) + parseInt(b);
