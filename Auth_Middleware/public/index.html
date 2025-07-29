@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auth Website</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+    <style>
+        /* Reset and base styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            margin-bottom: 16px;
+            color: #90caf9;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            margin-bottom: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: #2c2c2c;
+            color: white;
+        }
+
+        input:focus {
+            outline: 2px solid #90caf9;
+            background-color: #333;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #90caf9;
+            color: #121212;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #64b5f6;
+        }
+
+        #information {
+            background-color: #2c2c2c;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-size: 1rem;
+        }
+
+        .logout-btn {
+            background-color: #ef5350;
+            margin-top: 12px;
+        }
+
+        .logout-btn:hover {
+            background-color: #e53935;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+            gap: 10px;
+        }
+
+        .toggle-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            background-color: #2c2c2c;
+            color: #f5f5f5;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 0 0 transparent;
+        }
+
+        .toggle-buttons button:hover {
+            background-color: #3c3c3c;
+            transform: translateY(-1px);
+        }
+
+        .toggle-buttons button.active {
+            background-color: #90caf9;
+            color: #121212;
+            box-shadow: 0 4px 12px rgba(144, 202, 249, 0.2);
+            transform: translateY(0);
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="toggle-buttons">
+            <button id="show-signup" onclick="showSignup()">Signup</button>
+            <button id="show-signin" onclick="showSignin()">Signin</button>
+        </div>
+
+        <div class="section" id="signup-section">
+            <h2>Signup</h2>
+            <input id="signup-username" type="text" placeholder="Username" />
+            <input id="signup-password" type="password" placeholder="Password" />
+            <button onclick="signup()">Submit</button>
+        </div>
+
+        <div class="section" id="signin-section">
+            <h2>Signin</h2>
+            <input id="signin-username" type="text" placeholder="Username" />
+            <input id="signin-password" type="password" placeholder="Password" />
+            <button onclick="signin()">Submit</button>
+        </div>
+
+        <div class="section" id="info-section" style="display: none;">
+            <h2>User Info</h2>
+            <div id="information"></div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        function showSignup() {
+            document.getElementById("signup-section").style.display = "block";
+            document.getElementById("signin-section").style.display = "none";
+            document.getElementById("show-signup").classList.add("active");
+            document.getElementById("show-signin").classList.remove("active");
+        }
+
+        function showSignin() {
+            document.getElementById("signup-section").style.display = "none";
+            document.getElementById("signin-section").style.display = "block";
+            document.getElementById("show-signup").classList.remove("active");
+            document.getElementById("show-signin").classList.add("active");
+        }
+
+        async function signup() {
+            const username = document.getElementById("signup-username").value;
+            const password = document.getElementById("signup-password").value;
+            await axios.post("http://localhost:3000/signup", {
+                username,
+                password,
+            });
+            alert("You are signed up !");
+            showSignin();
+        }
+
+        async function signin() {
+            const username = document.getElementById("signin-username").value;
+            const password = document.getElementById("signin-password").value;
+            const response = await axios.post("http://localhost:3000/signin", {
+                username,
+                password,
+            });
+            localStorage.setItem("token", response.data.token);
+            alert("You are signed in !");
+            loadUserInfo();
+        }
+
+        async function loadUserInfo() {
+            try {
+                const response = await axios.get("http://localhost:3000/me", {
+                    headers: {
+                        authorization: localStorage.getItem("token"),
+                    },
+                });
+                document.getElementById("information").innerText =
+                    "Username: " + response.data.username;
+                document.getElementById("signup-section").style.display = "none";
+                document.getElementById("signin-section").style.display = "none";
+                document.getElementById("info-section").style.display = "block";
+                document.querySelector(".toggle-buttons").style.display = "none";
+            } catch (err) {
+                console.log("Not authenticated");
+                document.getElementById("info-section").style.display = "none";
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("token");
+            document.getElementById("information").innerHTML = "";
+            document.getElementById("info-section").style.display = "none";
+            document.querySelector(".toggle-buttons").style.display = "flex";
+            showSignin();
+        }
+
+        // Auto-load user info if logged in
+        window.onload = function () {
+            if (localStorage.getItem("token")) {
+                loadUserInfo();
+            } else {
+                showSignin();
+            }
+        };
+    </script>
+</body>
+
+</html>
