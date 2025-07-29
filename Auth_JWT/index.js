@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 // needs to store in .env file
-const JWT_SECRET = "harshitkachhadiacohort3.0";
+const JWT_SECRET = "";
 const PORT = 3000;
 
 const app = express();
